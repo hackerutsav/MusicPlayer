@@ -73,6 +73,11 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    public void songPicked(View view){
+        musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
+        musicSrv.playSong();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -83,16 +88,17 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-
+        //menu item selected
+        switch (item.getItemId()) {
+            case R.id.action_shuffle:
+                //shuffle
+                break;
+            case R.id.action_end:
+                stopService(playIntent);
+                musicSrv=null;
+                System.exit(0);
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -118,5 +124,11 @@ public class MainActivity extends ActionBarActivity {
             while (musicCursor.moveToNext());
         }
 
+    }
+    @Override
+    protected void onDestroy() {
+        stopService(playIntent);
+        musicSrv=null;
+        super.onDestroy();
     }
 }

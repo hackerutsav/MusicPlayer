@@ -15,9 +15,7 @@ import android.util.Log;
 /**
  * Created by root on 4/27/15.
  */
-public class MusicService extends Service implements
-        MediaPlayer.OnPreparedListener
-        {
+public class MusicService extends Service implements MediaPlayer.OnPreparedListener {
     //media player
     private final IBinder musicBind = new MusicBinder();
     private MediaPlayer player;
@@ -25,6 +23,30 @@ public class MusicService extends Service implements
     private ArrayList<Song> songs;
     //current position
     private int songPosn;
+
+    public int getPosn(){
+        return player.getCurrentPosition();
+    }
+
+    public int getDur(){
+        return player.getDuration();
+    }
+
+    public boolean isPng(){
+        return player.isPlaying();
+    }
+
+    public void pausePlayer(){
+        player.pause();
+    }
+
+    public void seek(int posn){
+        player.seekTo(posn);
+    }
+
+    public void go(){
+        player.start();
+    }
 
     @Override
     public IBinder onBind(Intent intent) {

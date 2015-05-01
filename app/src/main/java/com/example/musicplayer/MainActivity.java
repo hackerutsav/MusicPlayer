@@ -20,13 +20,89 @@ import android.content.ServiceConnection;
 import android.view.MenuItem;
 import android.view.View;
 import com.example.musicplayer.MusicService.MusicBinder;
+import android.widget.MediaController.MediaPlayerControl;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements MediaPlayerControl {
     private ArrayList<Song> songList;
+    private MusicController controller;
     private ListView songView;
     private MusicService musicSrv;
     private Intent playIntent;
     private boolean musicBound=false;
+
+    @Override
+    public void start() {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public int getDuration() {
+        return 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return 0;
+    }
+
+    @Override
+    public void seekTo(int pos) {
+
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return false;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return false;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return false;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return false;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+
+    private void setController(){
+        controller = new MusicController(this);
+        controller.setPrevNextListeners(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playNext();
+            },new View.OnClickListener(){
+                @Override
+                public void onClick(){
+                    playPrev();
+                }
+            }
+        });
+        controller.setMediaPlayer(this);
+        controller.setAnchorView(findViewById(R.id.song_list));
+        controller.setEnabled(true);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +119,7 @@ public class MainActivity extends ActionBarActivity {
         SongAdapter songAdt = new SongAdapter(this, songList);
         songView.setAdapter(songAdt);
         //connect to the service
+        setController();
 
     }
     private ServiceConnection musicConnection = new ServiceConnection(){

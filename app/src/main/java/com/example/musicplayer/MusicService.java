@@ -11,6 +11,10 @@ import android.media.AudioManager;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
+import java.util.Random;
+import android.app.Notification;
+import android.app.PendingIntent;
+
 
 /**
  * Created by root on 4/27/15.
@@ -36,7 +40,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         return player.isPlaying();
     }
 
-    public void pausePlayer(){
+    public void pausePlayer() {
         player.pause();
     }
 
@@ -46,6 +50,19 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     public void go(){
         player.start();
+    }
+
+    public void playPrev(){
+        songPosn--;
+        if(songPosn<0) songPosn=songs.size()-1;
+        playSong();
+    }
+
+    //skip to next
+    public void playNext(){
+        songPosn++;
+        if(songPosn >= songs.size()) songPosn=0;
+        playSong();
     }
 
     @Override
@@ -115,6 +132,9 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onPrepared(MediaPlayer mp) {
         //start playback
         mp.start();
+        Intent notIntent = new Intent(this , MainActivity.class);
+        notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent
     }
 
     public void setSong(int songIndex){

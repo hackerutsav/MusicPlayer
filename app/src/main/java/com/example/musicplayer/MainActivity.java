@@ -23,12 +23,14 @@ import com.example.musicplayer.MusicService.MusicBinder;
 import android.widget.MediaController.MediaPlayerControl;
 
 public class MainActivity extends ActionBarActivity implements MediaPlayerControl {
+
     private ArrayList<Song> songList;
     private MusicController controller;
     private ListView songView;
     private MusicService musicSrv;
     private Intent playIntent;
     private boolean musicBound=false;
+    private boolean paused=false, playbackPaused=false;
 
     @Override
     public void start() {
@@ -38,6 +40,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayerContro
     @Override
     public void pause() {
         musicSrv.pausePlayer();
+        playbackPaused=true;
     }
 
     @Override
@@ -112,13 +115,42 @@ public class MainActivity extends ActionBarActivity implements MediaPlayerContro
     //play next
     private  void playNext(){
         musicSrv.playNext();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
         controller.show(0);
     }
 
     //play previous
     private void playPrev(){
         musicSrv.playPrev();
+        if(playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
         controller.show(0);
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        paused=true;
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if (paused){
+            setController();
+            paused=false;
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        controller.hide();
+        super.onStop();
     }
 
 
@@ -171,6 +203,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayerContro
     public void songPicked(View view){
         musicSrv.setSong(Integer.parseInt(view.getTag().toString()));
         musicSrv.playSong();
+        if (playbackPaused){
+            setController();
+            playbackPaused=false;
+        }
+        controller.show(0);
     }
 
 
@@ -187,7 +224,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayerContro
         switch (item.getItemId()) {
             case R.id.action_shuffle:
                 //shuffle
+                musicSrv.setShuffle();
                 break;
+
             case R.id.action_end:
                 stopService(playIntent);
                 musicSrv=null;

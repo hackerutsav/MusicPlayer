@@ -19,8 +19,13 @@ import android.app.PendingIntent;
 /**
  * Created by root on 4/27/15.
  */
-public class MusicService extends Service implements MediaPlayer.OnPreparedListener {
+public class MusicService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener,
+        MediaPlayer.OnCompletionListener {
     //media player
+    private String songTitle="";
+    private static final int NOTIFY_ID=1;
+    private Boolean shuffle = false;
+    private Random rand;
     private final IBinder musicBind = new MusicBinder();
     private MediaPlayer player;
     //song list
@@ -60,8 +65,16 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     //skip to next
     public void playNext(){
-        songPosn++;
-        if(songPosn >= songs.size()) songPosn=0;
+        if (shuffle) {
+            int newSong = songPosn;
+            while (newSong==songPosn){
+                newSong = rand.nextInt(songs.size());
+            }
+            songPosn=newSong;
+        }
+        else{
+            songPosn++;
+        if(songPosn >= songs.size()) songPosn=0;}
         playSong();
     }
 
@@ -78,6 +91,12 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         //create Player
         player = new MediaPlayer();
         initMusicPlayer();
+        rand = new Random();
+    }
+
+    public void setShuffle(){
+        if(shuffle) shuffle=false;
+        else shuffle=true;
     }
 
     @Override
@@ -92,6 +111,8 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         player.reset();
         //get song
         Song playSong = songs.get(songPosn);
+        //get title
+        songTitle = playSong.getTitle();
         //get id
         long currSong = playSong.getId();
         //set uri
@@ -134,10 +155,35 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         mp.start();
         Intent notIntent = new Intent(this , MainActivity.class);
         notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent
+        PendingIntent pendInt = PendingIntent.getActivity(this, 0, notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification.Builder builder = new Notification.Builder(this);
+        builder.setContentIntent(pendInt).setSmallIcon(R.drawable.play).setTicker(songTitle).setOngoing(true)
+                .setContentTitle("Playing").setContentText(songTitle);
+        Notification not  = builder.build();
+        startForeground(NOTIFY_ID, not);
+
+    }
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        mp.reset();
+        return false;
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        if(player.getCurrentPosition()>0){
+            mp.reset();
+            playNext();
+        }
     }
 
     public void setSong(int songIndex){
         songPosn=songIndex;
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
     }
 }
